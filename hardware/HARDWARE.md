@@ -16,7 +16,7 @@
 
 ### ESP32-WROOM-32 开发板 (ESP32-DevKitC 风格)
 
-![ESP32-WROOM-32 引脚图](images/esp32-wroom-32-pinout.jpg)
+![ESP32-WROOM-32 引脚图](images/esp32-devkitc-pinout.jpg)
 
 ```
 尺寸: 51.85 × 23.5 mm
@@ -73,7 +73,7 @@
 
 ### GY-521 模块 (MPU6050)
 
-![MPU6050 GY-521](images/6050.png)
+![MPU6050 GY-521](images/mpu6050-module.png)
 
 ```
 尺寸: 15.6 × 20.2 mm
