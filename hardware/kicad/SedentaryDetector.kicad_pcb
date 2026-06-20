@@ -50,6 +50,7 @@
 		)
 		(capping no)
 		(filling no)
+		(grid_origin 135.5 145)
 		(pcbplotparams
 			(layerselection 0x00000000_00000000_55555555_5755f5ff)
 			(plot_on_all_layers_selection 0x00000000_00000000_00000000_00000000)
@@ -90,11 +91,11 @@
 	(footprint ""
 		(layer "F.Cu")
 		(uuid "47e84370-edfd-489d-a5f5-05fb51aa3c0b")
-		(at 149.5 102.89)
+		(at 148 103)
 		(property "Reference" "J2"
 			(at 0 0 0)
 			(layer "F.SilkS")
-			(uuid "3997d97d-09b4-454c-bf2a-4a362655f6ea")
+			(uuid "65634634-904e-4c89-9dab-e0449ec77c54")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -104,7 +105,7 @@
 		(property "Value" "MPU6050_1x8"
 			(at 6 3.38 0)
 			(layer "F.Fab")
-			(uuid "08ec57e4-db40-4b2f-a2bb-a1468d418a1a")
+			(uuid "fa7ae9cc-6b8b-4e76-8bcd-d6a7844cdf88")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -115,7 +116,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "993ef82d-bc0f-48bb-b8d6-78767c65b490")
+			(uuid "36ab4af9-6101-4087-8c5d-2f1d5d893de8")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -126,7 +127,7 @@
 			(at 0 0 0)
 			(layer "F.Fab")
 			(hide yes)
-			(uuid "675ac897-f77e-47b7-b727-6835c0656646")
+			(uuid "4ea0f44a-8d1e-4076-9b90-634bb029b82d")
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -491,46 +492,6 @@
 			(uuid "1247903d-0acc-4f15-b38b-5a4249f68f87")
 		)
 		(embedded_fonts no)
-	)
-	(gr_line
-		(start 98.5 65)
-		(end 198.5 65)
-		(stroke
-			(width 0.1)
-			(type default)
-		)
-		(layer "Edge.Cuts")
-		(uuid "d95430be-5696-49db-9905-0ca9b02fe9fb")
-	)
-	(gr_line
-		(start 98.5 145)
-		(end 98.5 65)
-		(stroke
-			(width 0.1)
-			(type default)
-		)
-		(layer "Edge.Cuts")
-		(uuid "c1327d26-03a1-4a7a-8a73-be83b7e1fcb3")
-	)
-	(gr_line
-		(start 198.5 65)
-		(end 198.5 145)
-		(stroke
-			(width 0.1)
-			(type default)
-		)
-		(layer "Edge.Cuts")
-		(uuid "229b9445-3a9e-4526-92b5-cc739038223d")
-	)
-	(gr_line
-		(start 198.5 145)
-		(end 98.5 145)
-		(stroke
-			(width 0.1)
-			(type default)
-		)
-		(layer "Edge.Cuts")
-		(uuid "7a470087-3ef6-4d9e-81f2-1d811e152c0f")
 	)
 	(gr_text "L-P1"
 		(at 105.5 85 0)
