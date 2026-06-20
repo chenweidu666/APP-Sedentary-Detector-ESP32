@@ -13,3 +13,4 @@ Thumbs.db
 # Temp
 *.swp
 *.bak
+build/
