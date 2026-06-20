@@ -240,7 +240,7 @@
       "internal_id": "",
       "mfg": "",
       "mpn": "",
-      "sch_revision": ""
+      "sch_revision": "0.2"
     },
     "layer_pairs": [],
     "layer_presets": [],
@@ -649,13 +649,18 @@
       {
         "filename": "SedentaryDetector.kicad_sch",
         "name": "SedentaryDetector",
-        "uuid": "00000000-0000-0000-0000-000000000000"
+        "uuid": "c9bb8533-5510-495a-86a1-47335bb4bfe4"
       }
     ],
     "used_designators": "",
     "variants": []
   },
-  "sheets": [],
+  "sheets": [
+    [
+      "c9bb8533-5510-495a-86a1-47335bb4bfe4",
+      "SedentaryDetector"
+    ]
+  ],
   "text_variables": {},
   "tuning_profiles": {
     "meta": {
