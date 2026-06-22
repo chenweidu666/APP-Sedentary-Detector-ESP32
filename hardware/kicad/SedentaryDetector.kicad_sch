@@ -6,8 +6,9 @@
 	(paper "A3")
 	(title_block
 		(title "Sedentary Detector")
-		(date "2026-06-20")
-		(rev "0.2")
+		(date "2026-06-22")
+		(rev "0.5.1")
+		(comment 1 "J2 GY-87 Pin1=DRDY..Pin8=VCC_IN (载板正面插入; 模块背照丝印顺序相反)")
 	)
 	(lib_symbols
 		(symbol "Conn_01x02"
@@ -147,7 +148,7 @@
 					(justify left)
 				)
 			)
-			(property "Value" "MPU6050"
+			(property "Value" "GY-87"
 				(at 0 12.7 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -208,7 +209,7 @@
 				(pin passive line
 					(at 0 10.16 0)
 					(length 2.54)
-					(name "1"
+					(name "DRDY"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -226,7 +227,7 @@
 				(pin passive line
 					(at 0 7.62 0)
 					(length 2.54)
-					(name "2"
+					(name "INTA"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -244,7 +245,7 @@
 				(pin passive line
 					(at 0 5.08 0)
 					(length 2.54)
-					(name "3"
+					(name "FSYNC"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -262,7 +263,7 @@
 				(pin passive line
 					(at 0 2.54 0)
 					(length 2.54)
-					(name "4"
+					(name "SDA"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -280,7 +281,7 @@
 				(pin passive line
 					(at 0 0 0)
 					(length 2.54)
-					(name "5"
+					(name "SCL"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -298,7 +299,7 @@
 				(pin passive line
 					(at 0 -2.54 0)
 					(length 2.54)
-					(name "6"
+					(name "GND"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -316,7 +317,7 @@
 				(pin passive line
 					(at 0 -5.08 0)
 					(length 2.54)
-					(name "7"
+					(name "3.3V"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -334,7 +335,7 @@
 				(pin passive line
 					(at 0 -7.62 0)
 					(length 2.54)
-					(name "8"
+					(name "VCC_IN"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -995,7 +996,7 @@
 		(uuid "091b31c6-42fc-4d4d-b29f-38fa3f08ef8f")
 	)
 	(label "GND"
-		(at 81.28 82.55 180)
+		(at 81.28 87.63 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1005,7 +1006,7 @@
 		(uuid "2db5513c-95cc-4af6-babf-b11ed80d199c")
 	)
 	(label "I2C_SCL"
-		(at 81.28 85.09 180)
+		(at 81.28 90.17 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1015,7 +1016,7 @@
 		(uuid "59275789-68f8-4175-a152-e80e3203e8ee")
 	)
 	(label "I2C_SDA"
-		(at 81.28 87.63 180)
+		(at 81.28 92.71 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1035,7 +1036,7 @@
 		(uuid "91072683-a78d-4753-9c7e-fde7e213b3c6")
 	)
 	(label "3V3"
-		(at 81.28 80.01 180)
+		(at 81.28 82.55 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -1093,6 +1094,18 @@
 			(justify right bottom)
 		)
 		(uuid "fb816834-4719-4a9f-b33e-c78b6bbd71e4")
+	)
+	(no_connect
+		(at 78.74 100.33)
+		(uuid "a1b2c3d4-1111-4000-8000-000000000002")
+	)
+	(no_connect
+		(at 78.74 95.25)
+		(uuid "a1b2c3d4-1111-4000-8000-000000000006")
+	)
+	(no_connect
+		(at 78.74 84.09)
+		(uuid "a1b2c3d4-1111-4000-8000-000000000008")
 	)
 	(symbol
 		(lib_id "Conn_01x02")
@@ -1196,7 +1209,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "MPU6050_1x8"
+		(property "Value" "GY-87"
 			(at 81.28 102.87 0)
 			(show_name no)
 			(do_not_autoplace no)

@@ -102,7 +102,7 @@
 				)
 			)
 		)
-		(property "Value" "MPU6050_1x8"
+		(property "Value" "GY-87_1x8"
 			(at -5.5 -8.33 0)
 			(layer "F.Fab")
 			(uuid "dc83b0c0-e246-4d82-87ae-213f6647e594")

@@ -1,4 +1,4 @@
-"""从 HARDWARE.md 网络表生成载板原理图骨架（ESP32-WROOM-32 2×15 + MPU6050 1×8）。"""
+"""从 HARDWARE.md 网络表生成载板原理图骨架（ESP32-WROOM-32 2×15 + GY-87 1×8）。"""
 
 import uuid
 from pathlib import Path
@@ -89,7 +89,7 @@ for pin in range(1, ESP_NUM_PINS + 1):
     if pin not in USED_ESP_PINS:
         nc_idx += 1
         uuids[f"nc{nc_idx}"] = gen_uuid()
-for pin in (5, 6, 7):
+for pin in (1, 3, 7):
     uuids[f"nc_mpu{pin}"] = gen_uuid()
 
 
@@ -136,7 +136,16 @@ esp_symbol = f"""(symbol "Conn_02x15" (pin_names (offset 1.016)) (in_bom yes) (o
     )"""
 
 mpu_pins = []
-mpu_pin_names = {1: "VCC", 2: "GND", 3: "SCL", 4: "SDA", 5: "XDA", 6: "XCL", 7: "AD0", 8: "INT"}
+mpu_pin_names = {
+    1: "DRDY",
+    2: "INTA",
+    3: "FSYNC",
+    4: "SDA",
+    5: "SCL",
+    6: "GND",
+    7: "3.3V",
+    8: "VCC_IN",
+}
 for i in range(1, 9):
     y = 8.89 - (i - 1) * 2.54
     mpu_pins.append(
@@ -146,26 +155,26 @@ for i in range(1, 9):
         )"""
     )
 
-mpu_symbol = f"""(symbol "CarrierBoard:GY521_MPU6050_1x8" (pin_numbers hide) (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
-			(property "Reference" "MPU" (at 0 -11.43 0)
+mpu_symbol = f"""(symbol "CarrierBoard:GY87_1x8" (pin_numbers hide) (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
+			(property "Reference" "J2" (at 0 -11.43 0)
         (effects (font (size 1.27 1.27)) (justify top))
       )
-			(property "Value" "GY-521_MPU6050_1x8" (at 0 -13.97 0)
+			(property "Value" "GY-87_1x8" (at 0 -13.97 0)
         (effects (font (size 1.27 1.27)) hide)
       )
-			(property "Footprint" "CarrierBoard:GY521_MPU6050_1x8" (at 0 12.7 0)
+			(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Vertical" (at 0 12.7 0)
         (effects (font (size 1.27 1.27)) hide)
       )
 			(property "Datasheet" "" (at 0 0 0)
         (effects (font (size 1.27 1.27)) hide)
       )
-			(symbol "GY521_MPU6050_1x8_0_1"
+			(symbol "GY87_1x8_0_1"
         (rectangle (start -5.08 -11.43) (end 5.08 11.43)
           (stroke (width 0.254) (type default))
           (fill (type background))
         )
       )
-			(symbol "GY521_MPU6050_1x8_1_1"
+			(symbol "GY87_1x8_1_1"
 {chr(10).join(mpu_pins)}
       )
     )"""
@@ -264,7 +273,7 @@ content = f"""(kicad_sch (version 20250114) (generator eeschema)
     (date "2026-06-22")
     (rev "0.3")
     (company "Personal Project")
-    (comment 1 "ESP32-WROOM-32 DevKitC 2x15 + MPU6050")
+    (comment 1 "ESP32-WROOM-32 DevKitC 2x15 + GY-87")
   )
 
 {lib_symbols}
@@ -277,14 +286,14 @@ for pin in range(1, ESP_NUM_PINS + 1):
         px, py = esp_pin_abs(pin)
         content += f"""  (no_connect (at {px} {py}) (uuid {uuids[f"nc{nc_idx}"]}))
 """
-for pin in (5, 6, 7):
+for pin in (1, 3, 7):
     px, py = mpu_pin_abs(pin)
     content += f"""  (no_connect (at {px} {py}) (uuid {uuids[f"nc_mpu{pin}"]}))
 """
 
-# 3V3: ESP pin1 → MPU pin1
+# 3V3: ESP pin1 → GY-87 pin8 (VCC_IN)
 p3v3 = esp_pin_abs(PIN_3V3)
-p_mpu_vcc = mpu_pin_abs(1)
+p_mpu_vcc = mpu_pin_abs(8)
 content += f"""  (wire (pts (xy {p3v3[0]} {p3v3[1]}) (xy 40 {p3v3[1]}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire1"]}))
@@ -324,7 +333,7 @@ content += f"""  (label "3V3" (at 40 {p3v3[1]+2.54} 0) (fields_autoplaced)
     (uuid {uuids["label_3v3"]}))
 """
 
-# I2C_SDA: ESP pin25 → MPU pin4
+# I2C_SDA: ESP pin25 → GY-87 pin4
 p_sda = esp_pin_abs(PIN_SDA)
 p_mpu_sda = mpu_pin_abs(4)
 content += f"""  (wire (pts (xy {p_sda[0]} {p_sda[1]}) (xy {p_mpu_sda[0]} {p_mpu_sda[1]}))
@@ -335,9 +344,9 @@ content += f"""  (wire (pts (xy {p_sda[0]} {p_sda[1]}) (xy {p_mpu_sda[0]} {p_mpu
     (uuid {uuids["label_sda"]}))
 """
 
-# I2C_SCL: ESP pin22 → MPU pin3
+# I2C_SCL: ESP pin22 → GY-87 pin5
 p_scl = esp_pin_abs(PIN_SCL)
-p_mpu_scl = mpu_pin_abs(3)
+p_mpu_scl = mpu_pin_abs(5)
 content += f"""  (wire (pts (xy {p_scl[0]} {p_scl[1]}) (xy {p_mpu_scl[0]} {p_mpu_scl[1]}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire5"]}))
@@ -346,9 +355,9 @@ content += f"""  (wire (pts (xy {p_scl[0]} {p_scl[1]}) (xy {p_mpu_scl[0]} {p_mpu
     (uuid {uuids["label_scl"]}))
 """
 
-# MPU_INT: ESP pin26 → MPU pin8
+# MPU_INT: ESP pin26 → GY-87 pin2 INTA
 p_int = esp_pin_abs(PIN_INT)
-p_mpu_int = mpu_pin_abs(8)
+p_mpu_int = mpu_pin_abs(2)
 content += f"""  (wire (pts (xy {p_int[0]} {p_int[1]}) (xy {p_mpu_int[0]} {p_mpu_int[1]}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire6"]}))
@@ -360,7 +369,7 @@ content += f"""  (wire (pts (xy {p_int[0]} {p_int[1]}) (xy {p_mpu_int[0]} {p_mpu
 # GND bus: ESP 14/19/28 + MPU GND
 gnd_y = 130
 gnd_pins = [esp_pin_abs(PIN_GND_LEFT), esp_pin_abs(PIN_GND_MID), esp_pin_abs(PIN_GND_RIGHT)]
-mpu_gnd = mpu_pin_abs(2)
+mpu_gnd = mpu_pin_abs(6)
 
 content += f"""  (wire (pts (xy {gnd_pins[0][0]} {gnd_pins[0][1]}) (xy {gnd_pins[0][0]} {gnd_y}))
     (stroke (width 0) (type default))
@@ -441,16 +450,16 @@ content += f"""
 
 mpu_pin_uuids = "\n".join([f'    (pin "{i}" (uuid {uuids[f"mpu_pin{i}"]}))' for i in range(1, 9)])
 content += f"""
-  (symbol (lib_id "CarrierBoard:GY521_MPU6050_1x8") (at {mpu_at_x} {mpu_at_y} 0) (unit 1)
+  (symbol (lib_id "CarrierBoard:GY87_1x8") (at {mpu_at_x} {mpu_at_y} 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid {uuids["mpu_sym"]})
-    (property "Reference" "MPU" (at {mpu_at_x} {mpu_at_y-15.24} 0)
+    (property "Reference" "J2" (at {mpu_at_x} {mpu_at_y-15.24} 0)
       (effects (font (size 1.27 1.27)) (justify top))
     )
-    (property "Value" "GY-521_MPU6050_1x8" (at {mpu_at_x} {mpu_at_y-17.78} 0)
+    (property "Value" "GY-87_1x8" (at {mpu_at_x} {mpu_at_y-17.78} 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Footprint" "CarrierBoard:GY521_MPU6050_1x8" (at {mpu_at_x} {mpu_at_y+15.24} 0)
+    (property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x08_P2.54mm_Vertical" (at {mpu_at_x} {mpu_at_y+15.24} 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at {mpu_at_x} {mpu_at_y} 0)
@@ -470,4 +479,4 @@ DST.write_text(content)
 print("OK: Schematic written successfully")
 print(f"Output: {DST}")
 print(f"ESP32-WROOM-32 J1 at ({esp_at_x}, {esp_at_y})")
-print(f"MPU6050 at ({mpu_at_x}, {mpu_at_y})")
+print(f"GY-87 J2 at ({mpu_at_x}, {mpu_at_y})")

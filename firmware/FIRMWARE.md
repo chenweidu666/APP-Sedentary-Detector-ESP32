@@ -1,6 +1,8 @@
 # 固件设计文档
 
 > **平台**：ESP32-WROOM-32（`platformio.ini` 中 `board = esp32dev`）。载板 I2C 为 GPIO4/5，板载 LED 为 GPIO2。
+>
+> **安装姿态**：台架竖直立放时基准角约 ±90°（实测 ~97°）；水平安装时约 0°。检测使用 `delta = |angle - baseline|`，与绝对角度无关。见 `hardware/HARDWARE.md`。
 
 ## 固件架构
 
