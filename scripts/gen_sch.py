@@ -1,77 +1,150 @@
+"""从 HARDWARE.md 网络表生成载板原理图骨架（ESP32-WROOM-32 2×15 + MPU6050 1×8）。"""
+
 import uuid
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+# 默认写入 .gen 文件，避免覆盖 KiCad GUI 中手工维护的原理图
+DST = ROOT / "hardware/kicad/SedentaryDetector.gen.kicad_sch"
+
+ESP_NUM_PINS = 30
+
+# DevKitC 排针编号 → 功能名（见 hardware/HARDWARE.md）
+ESP_PIN_NAMES = {
+    1: "3V3",
+    2: "EN",
+    3: "GPIO36",
+    4: "GPIO39",
+    5: "GPIO34",
+    6: "GPIO35",
+    7: "GPIO32",
+    8: "GPIO33",
+    9: "GPIO25",
+    10: "GPIO26",
+    11: "GPIO27",
+    12: "GPIO14",
+    13: "GPIO12",
+    14: "GND",
+    15: "VIN",
+    16: "GPIO23",
+    17: "GPIO22",
+    18: "GPIO21",
+    19: "GND",
+    20: "GPIO19",
+    21: "GPIO18",
+    22: "GPIO5/SCL",
+    23: "GPIO17",
+    24: "GPIO16",
+    25: "GPIO4/SDA",
+    26: "GPIO2/INT",
+    27: "GPIO15",
+    28: "GND",
+    29: "3V3",
+    30: "30",
+}
+
+# 载板已用网络对应的 ESP 排针编号
+PIN_3V3 = 1
+PIN_GND_LEFT = 14
+PIN_VIN = 15
+PIN_GND_MID = 19
+PIN_SCL = 22
+PIN_SDA = 25
+PIN_INT = 26
+PIN_GND_RIGHT = 28
+
+USED_ESP_PINS = {
+    PIN_3V3,
+    PIN_GND_LEFT,
+    PIN_VIN,
+    PIN_GND_MID,
+    PIN_SCL,
+    PIN_SDA,
+    PIN_INT,
+    PIN_GND_RIGHT,
+}
+
 
 def gen_uuid():
     return str(uuid.uuid4())
 
+
 uuids = {k: gen_uuid() for k in [
     "file", "esp_sym", "mpu_sym",
-    "gnd1", "gnd2", "gnd3", "gnd4",
-    "vcc3v3",
+    "pwr_gnd1", "pwr_gnd2", "pwr_3v3",
+    "pwr_gnd1_pin", "pwr_gnd2_pin", "pwr_3v3_pin",
 ]}
-for i in range(1, 19):
+for i in range(1, ESP_NUM_PINS + 1):
     uuids[f"esp_pin{i}"] = gen_uuid()
 for i in range(1, 9):
     uuids[f"mpu_pin{i}"] = gen_uuid()
-for i in range(1, 11):
+for i in range(1, 12):
     uuids[f"wire{i}"] = gen_uuid()
 for i in range(1, 5):
     uuids[f"junc{i}"] = gen_uuid()
 for name in ["label_gnd", "label_3v3", "label_5v", "label_sda", "label_scl", "label_int"]:
     uuids[name] = gen_uuid()
-for i in range(1, 14):
-    uuids[f"nc{i}"] = gen_uuid()
-for name in ["esp_ref", "mpu_ref", "pwr_gnd1", "pwr_gnd2", "pwr_gnd3", "pwr_gnd4", "pwr_3v3"]:
-    uuids[name] = gen_uuid()
+nc_idx = 0
+for pin in range(1, ESP_NUM_PINS + 1):
+    if pin not in USED_ESP_PINS:
+        nc_idx += 1
+        uuids[f"nc{nc_idx}"] = gen_uuid()
+for pin in (5, 6, 7):
+    uuids[f"nc_mpu{pin}"] = gen_uuid()
 
-# ============================================================
-# lib_symbols
-# ============================================================
-esp_pins = []
-for i in range(1, 10):
-    y = 10.16 - (i-1) * 2.54
-    esp_pins.append(f"""				(pin passive line (at -2.54 {y} 0) (length 2.54)
-          (name "{i}" (effects (font (size 1.27 1.27))))
-          (number "{i}" (effects (font (size 1.27 1.27))))
-        )""")
-for i in range(10, 19):
-    y = 10.16 - (i-10) * 2.54
-    esp_pins.append(f"""				(pin passive line (at 2.54 {y} 0) (length 2.54)
-          (name "{i}" (effects (font (size 1.27 1.27))))
-          (number "{i}" (effects (font (size 1.27 1.27))))
-        )""")
 
-esp_symbol = f"""(symbol "CarrierBoard:ESP32_C3_Mini_2x9" (pin_numbers hide) (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
-			(property "Reference" "ESP" (at 0 -10.16 0)
-        (effects (font (size 1.27 1.27)) (justify top))
+def conn_02x15_pin_lines(side: str, start_num: int, count: int) -> list[str]:
+    lines = []
+    x = -7.62 if side == "left" else 7.62
+    for i in range(count):
+        num = start_num + i
+        y = 20.32 - i * 2.54
+        name = ESP_PIN_NAMES.get(num, str(num))
+        lines.append(
+            f"""				(pin passive line (at {x} {y} 0) (length 2.54)
+          (name "{name}" (effects (font (size 1.27 1.27))))
+          (number "{num}" (effects (font (size 1.27 1.27))))
+        )"""
+        )
+    return lines
+
+
+esp_symbol_pins = conn_02x15_pin_lines("left", 1, 15) + conn_02x15_pin_lines("right", 16, 15)
+
+esp_symbol = f"""(symbol "Conn_02x15" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
+			(property "Reference" "J1" (at 0 20.32 0)
+        (effects (font (size 1.27 1.27)) (justify left))
       )
-			(property "Value" "ESP32-C3_Mini_2x9" (at 0 -12.7 0)
-        (effects (font (size 1.27 1.27)) hide)
+			(property "Value" "ESP32_2x15" (at 0 22.86 0)
+        (effects (font (size 1.27 1.27)) (justify left))
       )
-			(property "Footprint" "CarrierBoard:ESP32_C3_Mini_2x9" (at 0 13.97 0)
+			(property "Footprint" "" (at 0 -20.32 0)
         (effects (font (size 1.27 1.27)) hide)
       )
 			(property "Datasheet" "" (at 0 0 0)
         (effects (font (size 1.27 1.27)) hide)
       )
-			(symbol "ESP32_C3_Mini_2x9_0_1"
-        (rectangle (start -5.08 -12.7) (end 5.08 12.7)
+			(symbol "Conn_02x15_0_1"
+        (rectangle (start -7.62 20.32) (end 7.62 -20.32)
           (stroke (width 0.254) (type default))
           (fill (type background))
         )
       )
-			(symbol "ESP32_C3_Mini_2x9_1_1"
-{chr(10).join(esp_pins)}
+			(symbol "Conn_02x15_1_1"
+{chr(10).join(esp_symbol_pins)}
       )
     )"""
 
 mpu_pins = []
 mpu_pin_names = {1: "VCC", 2: "GND", 3: "SCL", 4: "SDA", 5: "XDA", 6: "XCL", 7: "AD0", 8: "INT"}
 for i in range(1, 9):
-    y = 8.89 - (i-1) * 2.54
-    mpu_pins.append(f"""				(pin passive line (at 0 {y} 0) (length 2.54)
+    y = 8.89 - (i - 1) * 2.54
+    mpu_pins.append(
+        f"""				(pin passive line (at 0 {y} 0) (length 2.54)
           (name "{mpu_pin_names[i]}" (effects (font (size 1.27 1.27))))
           (number "{i}" (effects (font (size 1.27 1.27))))
-        )""")
+        )"""
+    )
 
 mpu_symbol = f"""(symbol "CarrierBoard:GY521_MPU6050_1x8" (pin_numbers hide) (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
 			(property "Reference" "MPU" (at 0 -11.43 0)
@@ -161,29 +234,26 @@ lib_symbols = f"""  (lib_symbols
     )
   )"""
 
-# ============================================================
-# Pin coordinates
-# ============================================================
-esp_at_x, esp_at_y = 50, 80
+esp_at_x, esp_at_y = 50, 100
 mpu_at_x, mpu_at_y = 170, 80
 
-def esp_pin_abs(pin_num):
-    if pin_num <= 9:
-        px = esp_at_x - 2.54
-        py = esp_at_y + (10.16 - (pin_num-1) * 2.54)
+
+def esp_pin_abs(pin_num: int) -> tuple[float, float]:
+    if pin_num <= 15:
+        px = esp_at_x - 7.62
+        py = esp_at_y + (20.32 - (pin_num - 1) * 2.54)
     else:
-        px = esp_at_x + 2.54
-        py = esp_at_y + (10.16 - (pin_num-10) * 2.54)
+        px = esp_at_x + 7.62
+        py = esp_at_y + (20.32 - (pin_num - 16) * 2.54)
     return (px, py)
 
-def mpu_pin_abs(pin_num):
+
+def mpu_pin_abs(pin_num: int) -> tuple[float, float]:
     px = mpu_at_x
-    py = mpu_at_y + (8.89 - (pin_num-1) * 2.54)
+    py = mpu_at_y + (8.89 - (pin_num - 1) * 2.54)
     return (px, py)
 
-# ============================================================
-# Begin schematic
-# ============================================================
+
 content = f"""(kicad_sch (version 20250114) (generator eeschema)
 
   (uuid {uuids["file"]})
@@ -191,47 +261,46 @@ content = f"""(kicad_sch (version 20250114) (generator eeschema)
   (paper "A3")
   (title_block
     (title "Sedentary Detector - Carrier Board")
-    (date "2026-06-20")
-    (rev "0.2")
+    (date "2026-06-22")
+    (rev "0.3")
     (company "Personal Project")
+    (comment 1 "ESP32-WROOM-32 DevKitC 2x15 + MPU6050")
   )
 
 {lib_symbols}
-
-  (no_connect (at {esp_pin_abs(3)[0]} {esp_pin_abs(3)[1]}) (uuid {uuids["nc1"]}))
-  (no_connect (at {esp_pin_abs(4)[0]} {esp_pin_abs(4)[1]}) (uuid {uuids["nc2"]}))
-  (no_connect (at {esp_pin_abs(6)[0]} {esp_pin_abs(6)[1]}) (uuid {uuids["nc3"]}))
-  (no_connect (at {esp_pin_abs(12)[0]} {esp_pin_abs(12)[1]}) (uuid {uuids["nc4"]}))
-  (no_connect (at {esp_pin_abs(13)[0]} {esp_pin_abs(13)[1]}) (uuid {uuids["nc5"]}))
-  (no_connect (at {esp_pin_abs(14)[0]} {esp_pin_abs(14)[1]}) (uuid {uuids["nc6"]}))
-  (no_connect (at {esp_pin_abs(15)[0]} {esp_pin_abs(15)[1]}) (uuid {uuids["nc7"]}))
-  (no_connect (at {esp_pin_abs(16)[0]} {esp_pin_abs(16)[1]}) (uuid {uuids["nc8"]}))
-  (no_connect (at {esp_pin_abs(17)[0]} {esp_pin_abs(17)[1]}) (uuid {uuids["nc9"]}))
-  (no_connect (at {esp_pin_abs(18)[0]} {esp_pin_abs(18)[1]}) (uuid {uuids["nc10"]}))
-  (no_connect (at {mpu_pin_abs(5)[0]} {mpu_pin_abs(5)[1]}) (uuid {uuids["nc11"]}))
-  (no_connect (at {mpu_pin_abs(6)[0]} {mpu_pin_abs(6)[1]}) (uuid {uuids["nc12"]}))
-  (no_connect (at {mpu_pin_abs(7)[0]} {mpu_pin_abs(7)[1]}) (uuid {uuids["nc13"]}))
 """
 
-# 3V3: ESP pin2 → MPU pin1
-p2 = esp_pin_abs(2)
-p1m = mpu_pin_abs(1)
-content += f"""  (wire (pts (xy {p2[0]} {p2[1]}) (xy 40 {p2[1]}))
+nc_idx = 0
+for pin in range(1, ESP_NUM_PINS + 1):
+    if pin not in USED_ESP_PINS:
+        nc_idx += 1
+        px, py = esp_pin_abs(pin)
+        content += f"""  (no_connect (at {px} {py}) (uuid {uuids[f"nc{nc_idx}"]}))
+"""
+for pin in (5, 6, 7):
+    px, py = mpu_pin_abs(pin)
+    content += f"""  (no_connect (at {px} {py}) (uuid {uuids[f"nc_mpu{pin}"]}))
+"""
+
+# 3V3: ESP pin1 → MPU pin1
+p3v3 = esp_pin_abs(PIN_3V3)
+p_mpu_vcc = mpu_pin_abs(1)
+content += f"""  (wire (pts (xy {p3v3[0]} {p3v3[1]}) (xy 40 {p3v3[1]}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire1"]}))
-  (wire (pts (xy 40 {p2[1]}) (xy 40 {p1m[1]}))
+  (wire (pts (xy 40 {p3v3[1]}) (xy 40 {p_mpu_vcc[1]}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire2"]}))
-  (wire (pts (xy 40 {p1m[1]}) (xy {p1m[0]} {p1m[1]}))
+  (wire (pts (xy 40 {p_mpu_vcc[1]}) (xy {p_mpu_vcc[0]} {p_mpu_vcc[1]}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire3"]}))
-  (junction (at 40 {p2[1]}) (diameter 0) (color 0 0 0 0)
+  (junction (at 40 {p3v3[1]}) (diameter 0) (color 0 0 0 0)
     (uuid {uuids["junc1"]}))
-  (junction (at 40 {p1m[1]}) (diameter 0) (color 0 0 0 0)
+  (junction (at 40 {p_mpu_vcc[1]}) (diameter 0) (color 0 0 0 0)
     (uuid {uuids["junc2"]}))
 """
 
-vcc_pin = 40, p2[1]
+vcc_pin = 40, p3v3[1]
 content += f"""  (symbol (lib_id "power:VCC") (at {vcc_pin[0]} {vcc_pin[1]-3.81} 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid {uuids["pwr_3v3"]})
@@ -247,116 +316,121 @@ content += f"""  (symbol (lib_id "power:VCC") (at {vcc_pin[0]} {vcc_pin[1]-3.81}
     (property "Datasheet" "" (at {vcc_pin[0]} {vcc_pin[1]-3.81} 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid {uuids["pwr_3v3"]}_pin))
+    (pin "1" (uuid {uuids["pwr_3v3_pin"]}))
   )"""
 
-content += f"""  (label "3V3" (at 40 {p2[1]+2.54} 0) (fields_autoplaced)
+content += f"""  (label "3V3" (at 40 {p3v3[1]+2.54} 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid {uuids["label_3v3"]}))
 """
 
-# I2C_SDA: ESP pin7 → MPU pin4
-p7 = esp_pin_abs(7)
-p4m = mpu_pin_abs(4)
-content += f"""  (wire (pts (xy {p7[0]} {p7[1]}) (xy {p4m[0]} {p4m[1]}))
+# I2C_SDA: ESP pin25 → MPU pin4
+p_sda = esp_pin_abs(PIN_SDA)
+p_mpu_sda = mpu_pin_abs(4)
+content += f"""  (wire (pts (xy {p_sda[0]} {p_sda[1]}) (xy {p_mpu_sda[0]} {p_mpu_sda[1]}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire4"]}))
-  (label "I2C_SDA" (at 100 {p7[1]} 0) (fields_autoplaced)
+  (label "I2C_SDA" (at 100 {p_sda[1]} 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid {uuids["label_sda"]}))
 """
 
-# I2C_SCL: ESP pin8 → MPU pin3
-p8 = esp_pin_abs(8)
-p3m = mpu_pin_abs(3)
-content += f"""  (wire (pts (xy {p8[0]} {p8[1]}) (xy {p3m[0]} {p3m[1]}))
+# I2C_SCL: ESP pin22 → MPU pin3
+p_scl = esp_pin_abs(PIN_SCL)
+p_mpu_scl = mpu_pin_abs(3)
+content += f"""  (wire (pts (xy {p_scl[0]} {p_scl[1]}) (xy {p_mpu_scl[0]} {p_mpu_scl[1]}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire5"]}))
-  (label "I2C_SCL" (at 100 {p8[1]} 0) (fields_autoplaced)
+  (label "I2C_SCL" (at 100 {p_scl[1]} 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid {uuids["label_scl"]}))
 """
 
-# MPU_INT: ESP pin5 → MPU pin8
-p5 = esp_pin_abs(5)
-p8m = mpu_pin_abs(8)
-content += f"""  (wire (pts (xy {p5[0]} {p5[1]}) (xy {p8m[0]} {p8m[1]}))
+# MPU_INT: ESP pin26 → MPU pin8
+p_int = esp_pin_abs(PIN_INT)
+p_mpu_int = mpu_pin_abs(8)
+content += f"""  (wire (pts (xy {p_int[0]} {p_int[1]}) (xy {p_mpu_int[0]} {p_mpu_int[1]}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire6"]}))
-  (label "MPU_INT" (at 100 {p5[1]-3.81} 0) (fields_autoplaced)
+  (label "MPU_INT" (at 100 {p_int[1]-3.81} 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid {uuids["label_int"]}))
 """
 
-# GND
-gnd_y = 106
-esp_p1 = esp_pin_abs(1)
-esp_p9 = esp_pin_abs(9)
-mpu_p2 = mpu_pin_abs(2)
+# GND bus: ESP 14/19/28 + MPU GND
+gnd_y = 130
+gnd_pins = [esp_pin_abs(PIN_GND_LEFT), esp_pin_abs(PIN_GND_MID), esp_pin_abs(PIN_GND_RIGHT)]
+mpu_gnd = mpu_pin_abs(2)
 
-content += f"""  (wire (pts (xy {esp_p1[0]} {esp_p1[1]}) (xy {esp_p1[0]} {gnd_y}))
+content += f"""  (wire (pts (xy {gnd_pins[0][0]} {gnd_pins[0][1]}) (xy {gnd_pins[0][0]} {gnd_y}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire7"]}))
-  (wire (pts (xy {esp_p9[0]} {esp_p9[1]}) (xy {esp_p9[0]} {gnd_y}))
+  (wire (pts (xy {gnd_pins[1][0]} {gnd_pins[1][1]}) (xy {gnd_pins[1][0]} {gnd_y}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire8"]}))
-  (wire (pts (xy {mpu_p2[0]} {mpu_p2[1]}) (xy {mpu_p2[0]} {gnd_y}))
+  (wire (pts (xy {gnd_pins[2][0]} {gnd_pins[2][1]}) (xy {gnd_pins[2][0]} {gnd_y}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire9"]}))
-  (wire (pts (xy {esp_p1[0]} {gnd_y}) (xy {mpu_p2[0]} {gnd_y}))
+  (wire (pts (xy {mpu_gnd[0]} {mpu_gnd[1]}) (xy {mpu_gnd[0]} {gnd_y}))
     (stroke (width 0) (type default))
     (uuid {uuids["wire10"]}))
-  (junction (at {esp_p1[0]} {gnd_y}) (diameter 0) (color 0 0 0 0)
+  (wire (pts (xy {gnd_pins[0][0]} {gnd_y}) (xy {gnd_pins[2][0]} {gnd_y}))
+    (stroke (width 0) (type default))
+    (uuid {uuids["wire11"]}))
+  (junction (at {gnd_pins[0][0]} {gnd_y}) (diameter 0) (color 0 0 0 0)
     (uuid {uuids["junc3"]}))
-  (junction (at {mpu_p2[0]} {gnd_y}) (diameter 0) (color 0 0 0 0)
+  (junction (at {mpu_gnd[0]} {gnd_y}) (diameter 0) (color 0 0 0 0)
     (uuid {uuids["junc4"]}))
 """
 
-for gx, guid in [(esp_p1[0], uuids["pwr_gnd1"]), (mpu_p2[0], uuids["pwr_gnd2"])]:
-    gy = gnd_y
-    content += f"""  (symbol (lib_id "power:GND") (at {gx} {gy} 0) (unit 1)
+for gx, guid, guid_pin in [
+    (gnd_pins[0][0], uuids["pwr_gnd1"], uuids["pwr_gnd1_pin"]),
+    (mpu_gnd[0], uuids["pwr_gnd2"], uuids["pwr_gnd2_pin"]),
+]:
+    content += f"""  (symbol (lib_id "power:GND") (at {gx} {gnd_y} 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid {guid})
-    (property "Reference" "#PWR" (at {gx} {gy+6.35} 0)
+    (property "Reference" "#PWR" (at {gx} {gnd_y+6.35} 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Value" "GND" (at {gx} {gy+3.81} 0)
+    (property "Value" "GND" (at {gx} {gnd_y+3.81} 0)
       (effects (font (size 1.27 1.27)))
     )
-    (property "Footprint" "" (at {gx} {gy} 0)
+    (property "Footprint" "" (at {gx} {gnd_y} 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (property "Datasheet" "" (at {gx} {gy} 0)
+    (property "Datasheet" "" (at {gx} {gnd_y} 0)
       (effects (font (size 1.27 1.27)) hide)
     )
-    (pin "1" (uuid {guid}_pin))
+    (pin "1" (uuid {guid_pin}))
   )"""
 
-content += f"""  (label "GND" (at {esp_p1[0]} {gnd_y-2.54} 0) (fields_autoplaced)
+content += f"""  (label "GND" (at {gnd_pins[0][0]} {gnd_y-2.54} 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid {uuids["label_gnd"]}))
 """
 
-# 5V_PM11 label at ESP pin11
-p11 = esp_pin_abs(11)
-content += f"""  (label "5V_PM11" (at {p11[0]+5.08} {p11[1]} 0) (fields_autoplaced)
+# 5V_PM11 at VIN (pin15)
+p_vin = esp_pin_abs(PIN_VIN)
+content += f"""  (label "5V_PM11" (at {p_vin[0]+5.08} {p_vin[1]} 0) (fields_autoplaced)
     (effects (font (size 1.27 1.27)) (justify left bottom))
     (uuid {uuids["label_5v"]}))
 """
 
-# ESP32 Symbol instance
-esp_pin_uuids = "\n".join([f'    (pin "{i}" (uuid {uuids[f"esp_pin{i}"]}))' for i in range(1, 19)])
+esp_pin_uuids = "\n".join(
+    [f'    (pin "{i}" (uuid {uuids[f"esp_pin{i}"]}))' for i in range(1, ESP_NUM_PINS + 1)]
+)
 content += f"""
-  (symbol (lib_id "CarrierBoard:ESP32_C3_Mini_2x9") (at {esp_at_x} {esp_at_y} 0) (unit 1)
+  (symbol (lib_id "Conn_02x15") (at {esp_at_x} {esp_at_y} 0) (unit 1)
     (in_bom yes) (on_board yes) (fields_autoplaced)
     (uuid {uuids["esp_sym"]})
-    (property "Reference" "ESP" (at {esp_at_x} {esp_at_y-15.24} 0)
-      (effects (font (size 1.27 1.27)) (justify top))
+    (property "Reference" "J1" (at {esp_at_x} {esp_at_y+20.32} 0)
+      (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Value" "ESP32-C3_Mini_2x9" (at {esp_at_x} {esp_at_y-17.78} 0)
-      (effects (font (size 1.27 1.27)) hide)
+    (property "Value" "ESP32_2x15" (at {esp_at_x} {esp_at_y+22.86} 0)
+      (effects (font (size 1.27 1.27)) (justify left))
     )
-    (property "Footprint" "CarrierBoard:ESP32_C3_Mini_2x9" (at {esp_at_x} {esp_at_y+17.78} 0)
+    (property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x15_P2.54mm_Vertical" (at {esp_at_x} {esp_at_y-20.32} 0)
       (effects (font (size 1.27 1.27)) hide)
     )
     (property "Datasheet" "" (at {esp_at_x} {esp_at_y} 0)
@@ -365,7 +439,6 @@ content += f"""
 {esp_pin_uuids}
   )"""
 
-# MPU6050 Symbol instance
 mpu_pin_uuids = "\n".join([f'    (pin "{i}" (uuid {uuids[f"mpu_pin{i}"]}))' for i in range(1, 9)])
 content += f"""
   (symbol (lib_id "CarrierBoard:GY521_MPU6050_1x8") (at {mpu_at_x} {mpu_at_y} 0) (unit 1)
@@ -386,19 +459,15 @@ content += f"""
 {mpu_pin_uuids}
   )"""
 
-# symbol_instances
-content += f"""
-
+content += """
 
   (sheet_instances
     (path "/" (page "1"))
   )
 )"""
 
-dst = "/home/chenwei/Workspace/05-Foundation/04-Embedded-Projects/Projects/02-APP-Sedentary-Detector-ESP32C3/hardware/kicad/SedentaryDetector.kicad_sch"
-with open(dst, "w") as f:
-    f.write(content)
-
+DST.write_text(content)
 print("OK: Schematic written successfully")
-print(f"ESP32 placed at ({esp_at_x}, {esp_at_y})")
-print(f"MPU6050 placed at ({mpu_at_x}, {mpu_at_y})")
+print(f"Output: {DST}")
+print(f"ESP32-WROOM-32 J1 at ({esp_at_x}, {esp_at_y})")
+print(f"MPU6050 at ({mpu_at_x}, {mpu_at_y})")
