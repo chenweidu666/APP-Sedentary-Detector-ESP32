@@ -1,5 +1,7 @@
 # 固件设计文档
 
+> **平台**：ESP32-WROOM-32（`platformio.ini` 中 `board = esp32dev`）。载板 I2C 为 GPIO4/5，板载 LED 为 GPIO2。仓库目录名含 `ESP32C3` 为遗留命名。
+
 ## 固件架构
 
 ```
@@ -145,11 +147,11 @@ Topic: home/chair/desk/angle       → 当前倾斜角 (度)
 ### 电池电量检测
 
 ```
-ESP32-C3 ADC → PM11 电池电压分压
+ESP32-WROOM-32 ADC → PM11 电池电压分压
 
 - PM11 输出 5V (升压后), 无法直接测电池电压
 - 方案: 在 PM11 电池正负极间加分压电阻
-- ESP32 ADC 读取分压值, 换算为电池电量
+- 选用 ADC1 通道引脚（如 GPIO36/39 等仅输入 ADC 脚），读取分压值换算电量
 - 低电量阈值: 3.3V (约 10%)
 ```
 
@@ -239,7 +241,7 @@ public:
 
 // 电池参数
 #define LOW_BATTERY_THRESHOLD   10            // 低电量阈值 (%)
-#define BATTERY_ADC_PIN         GPIO_NUM_1    // ADC 引脚
+#define BATTERY_ADC_PIN         GPIO_NUM_36   // ADC1_CH0（仅输入，需外部分压）
 ```
 
 ---
@@ -299,18 +301,22 @@ void loop() {
 
 ## PlatformIO 工程配置
 
+当前工程（见 `platformio.ini`）：
+
 ```ini
-[env:esp32-c3]
+[env:esp32dev]
 platform = espressif32
-board = esp32-c3-devkitm-1
+board = esp32dev
 framework = arduino
 monitor_speed = 115200
 build_flags =
-    -DARDUINO_USB_MODE=1
-    -DARDUINO_USB_CDC_ON_BOOT=1
+    -DCORE_DEBUG_LEVEL=3
+    -DMOCK_MPU6050=1    ; 无传感器联调时保持 1；接上 MPU6050 后改为 0
 lib_deps =
-    sparkfun/SparkFun MPU-6050 Breakout Library
+    electroniccats/MPU6050@^1.4.3
 ```
+
+烧录与串口联调步骤见 [README.md](README.md)。
 
 ## 开发工具链
 

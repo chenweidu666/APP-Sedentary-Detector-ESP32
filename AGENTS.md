@@ -2,7 +2,7 @@
 
 ## Project
 
-久坐检测器载板 PCB (KiCad 10). ESP32-C3 Mini + MPU6050 + PM11 电池包。
+久坐检测器载板 PCB (KiCad 10). **ESP32-WROOM-32** DevKitC 风格开发板 + MPU6050 + PM11 电池包。（仓库目录名 `ESP32C3` 为遗留命名，硬件非 C3。）
 
 ## Design authority
 
