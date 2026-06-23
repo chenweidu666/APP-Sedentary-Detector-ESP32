@@ -8,6 +8,10 @@ constexpr int PIN_LED = 2;
 
 constexpr uint8_t MPU_ADDR = 0x68;
 
+constexpr uint8_t OLED_ADDR = 0x3C;
+constexpr int OLED_WIDTH = 128;
+constexpr int OLED_HEIGHT = 64;
+
 constexpr unsigned long SAMPLE_INTERVAL_MS = 2000;
 constexpr int DEBOUNCE_COUNT = 3;
 constexpr int SEDENTARY_MINUTES = 45;

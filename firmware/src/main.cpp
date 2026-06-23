@@ -1,14 +1,17 @@
 #include <Arduino.h>
 #include <Wire.h>
 #include <MPU6050.h>
+#include <Adafruit_SSD1306.h>
 
 #include "config.h"
 #include "detector.h"
 
 MPU6050 mpu;
 SedentaryDetector detector;
+Adafruit_SSD1306 oled(OLED_WIDTH, OLED_HEIGHT, &Wire, -1);
 
 bool mpu_ok = false;
+bool oled_ok = false;
 bool use_mock = false;
 float baseline_angle = 0.0f;
 
@@ -44,6 +47,45 @@ static bool init_mpu() {
   }
   Serial.println("[MPU6050] connected");
   return true;
+}
+
+static bool init_oled() {
+  if (!oled.begin(SSD1306_SWITCHCAPVCC, OLED_ADDR)) {
+    Serial.println("[OLED] not found at 0x3C");
+    return false;
+  }
+  oled.clearDisplay();
+  oled.setTextColor(SSD1306_WHITE);
+  oled.setTextSize(1);
+  oled.setCursor(0, 0);
+  oled.println("Sedentary Detector");
+  oled.println("booting...");
+  oled.display();
+  Serial.println("[OLED] connected");
+  return true;
+}
+
+static void draw_oled(float angle, SedentaryDetector::State state,
+                      unsigned long seated_min) {
+  if (!oled_ok) {
+    return;
+  }
+  oled.clearDisplay();
+  oled.setTextSize(1);
+  oled.setCursor(0, 0);
+  oled.printf("State: %s",
+              state == SedentaryDetector::OCCUPIED ? "OCCUPIED" : "VACANT");
+  oled.setCursor(0, 16);
+  oled.printf("Angle: %.1f deg", angle);
+  oled.setCursor(0, 32);
+  oled.printf("Delta: %.2f deg", fabsf(angle - baseline_angle));
+  oled.setCursor(0, 48);
+  if (state == SedentaryDetector::OCCUPIED) {
+    oled.printf("Seated: %lu min", seated_min);
+  } else {
+    oled.print("Seated: --");
+  }
+  oled.display();
 }
 
 static float read_angle() {
@@ -83,6 +125,8 @@ void setup() {
 
   Wire.begin(PIN_I2C_SDA, PIN_I2C_SCL);
   scan_i2c();
+
+  oled_ok = init_oled();
 
 #if MOCK_MPU6050
   use_mock = true;
@@ -148,6 +192,8 @@ void loop() {
     Serial.printf(" seated=%lum", seated_min);
   }
   Serial.printf(" mock=%d\n", use_mock);
+
+  draw_oled(angle, state, seated_min);
 
   delay(SAMPLE_INTERVAL_MS);
 }

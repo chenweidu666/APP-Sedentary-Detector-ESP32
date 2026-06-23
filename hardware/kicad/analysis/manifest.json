@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "project": "SedentaryDetector.kicad_pro",
+  "current": "2026-06-22_1704",
+  "runs": {
+    "2026-06-22_1704": {
+      "source_hashes": {
+        "SedentaryDetector.kicad_sch": "sha256:bd8b7daa585c8b1388e2afb0b7ac27fda35f7e9cffc279a6178276d39994d207"
+      },
+      "outputs": {
+        "schematic": "schematic.json"
+      },
+      "scripts": {
+        "schematic": "analyze_schematic.py SedentaryDetector.kicad_sch"
+      },
+      "generated": "2026-06-22T18:01:53+08:00",
+      "pinned": false
+    }
+  }
+}

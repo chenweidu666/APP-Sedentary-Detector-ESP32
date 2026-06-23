@@ -9,8 +9,7 @@
 | ESP32-WROOM-32 开发板                | https://detail.tmall.com/item.htm?id=805161973303&skuId=5879086331469 |
 | 陀螺仪模块 | **GY-87**（10DOF，固件用 MPU6050） | 淘宝/立创搜 GY-87 |
 | PM11锂电池包 (3.7V+充电+升压5V/2.4A) | https://item.taobao.com/item.htm?id=1007451636387&skuId=6002389453662 |
-| SS-12D00 滑动开关                    | 待补充                                                                |
-| JST-PH 2.0 座子                      | 待补充                                                                |
+| 0.96寸 OLED (I2C) | 128×64 SSD1306, 4Pin (VCC/GND/SCL/SDA) | 淘宝搜 0.96 OLED I2C |
 
 ---
 
@@ -28,50 +27,51 @@
 
 #### 左侧引脚 (从上到下, 15 pin)
 
-| Pin | 引脚        | 功能说明                   |
-| --- | ----------- | -------------------------- |
-| 1   | 3V3         | 3.3V 电源输出              |
-| 2   | EN          | 使能/复位引脚 (高电平有效) |
-| 3   | GPIO36 (VP) | ADC1_CH0, 仅输入           |
-| 4   | GPIO39 (VN) | ADC1_CH3, 仅输入           |
-| 5   | GPIO34      | ADC1_CH6, 仅输入           |
-| 6   | GPIO35      | ADC1_CH7, 仅输入           |
-| 7   | GPIO32      | ADC1_CH4 / TOUCH9          |
-| 8   | GPIO33      | ADC1_CH5 / TOUCH8          |
-| 9   | GPIO25      | ADC2_CH8 / DAC_1           |
-| 10  | GPIO26      | ADC2_CH9 / DAC_2           |
-| 11  | GPIO27      | ADC2_CH7 / TOUCH7          |
-| 12  | GPIO14      | ADC2_CH6 / TOUCH6 / MTMS   |
-| 13  | GPIO12      | ADC2_CH5 / TOUCH5 / MTDI   |
-| 14  | GND         | 接地                       |
-| 15  | VIN         | 外部电源输入 (5V)          |
+| Pin | 丝印       | 功能说明                   |
+| --- | ---------- | -------------------------- |
+| 1   | EN         | 使能/复位引脚 (高电平有效) |
+| 2   | UP (VP)    | GPIO36, ADC1_CH0, 仅输入   |
+| 3   | UN (VN)    | GPIO39, ADC1_CH3, 仅输入   |
+| 4   | D34        | GPIO34, ADC1_CH6, 仅输入   |
+| 5   | D35        | GPIO35, ADC1_CH7, 仅输入   |
+| 6   | D32        | GPIO32, ADC1_CH4 / TOUCH9  |
+| 7   | D33        | GPIO33, ADC1_CH5 / TOUCH8  |
+| 8   | D25        | GPIO25, ADC2_CH8 / DAC_1   |
+| 9   | D26        | GPIO26, ADC2_CH9 / DAC_2   |
+| 10  | D27        | GPIO27, ADC2_CH7 / TOUCH7  |
+| 11  | D14        | GPIO14, ADC2_CH6 / TOUCH6  |
+| 12  | D12        | GPIO12, ADC2_CH5 / TOUCH5  |
+| 13  | D13        | GPIO13, ADC2_CH4 / TOUCH4  |
+| 14  | GND        | 接地                       |
+| 15  | VIN        | 外部电源输入 (5V)          |
 
-#### 右侧引脚 (从上到下, 14 pin)
+#### 右侧引脚 (从上到下, 15 pin)
 
-| Pin | 引脚   | 功能说明                    |
-| --- | ------ | --------------------------- |
-| 16  | GPIO23 | VSPI MOSI                   |
-| 17  | GPIO22 | I2C SCL                     |
-| 18  | GPIO21 | I2C SDA                     |
-| 19  | GND    | 接地                        |
-| 20  | GPIO19 | VSPI MISO                   |
-| 21  | GPIO18 | VSPI SCK                    |
-| 22  | GPIO5  | VSPI SS / TOUCH5            |
-| 23  | GPIO17 | UART2 TXD                   |
-| 24  | GPIO16 | UART2 RXD                   |
-| 25  | GPIO4  | TOUCH0 / ADC2_CH0           |
-| 26  | GPIO2  | TOUCH2 / ADC2_CH2 / 板载LED |
-| 27  | GPIO15 | U0 RTS / TOUCH3 / ADC2_CH3  |
-| 28  | GND    | 接地                        |
-| 29  | 3V3    | 3.3V 电源输出               |
+| Pin | 丝印 | 功能说明                    |
+| --- | ---- | --------------------------- |
+| 16  | D23  | GPIO23, VSPI MOSI           |
+| 17  | D22  | GPIO22, I2C SCL (备用)      |
+| 18  | TXD  | GPIO1, UART0 TXD            |
+| 19  | RXD  | GPIO3, UART0 RXD            |
+| 20  | D21  | GPIO21, I2C SDA (备用)      |
+| 21  | D19  | GPIO19, VSPI MISO           |
+| 22  | D18  | GPIO18, VSPI SCK            |
+| 23  | D5   | GPIO5, VSPI SS / I2C SCL    |
+| 24  | D17  | GPIO17, UART2 TXD           |
+| 25  | D16  | GPIO16, UART2 RXD           |
+| 26  | D4   | GPIO4, I2C SDA              |
+| 27  | D2   | GPIO2, 板载 LED / MPU INT   |
+| 28  | D15  | GPIO15, U0 RTS              |
+| 29  | GND  | 接地                        |
+| 30  | 3V3  | 3.3V 电源输出               |
 
 > ⚠️ 注意事项:
 >
 > - GPIO34~39 仅输入，无输出、无内上下拉
 > - GPIO6~11 被 SPI Flash 占用，不建议使用
-> - GPIO12 上电影响 Flash 电压 (MTDI)，上电时保持低
+> - GPIO12 (D12) 上电影响 Flash 电压 (MTDI)，上电时保持低
 > - GPIO0 下载模式 (板子底部 BOOT 按钮)
-> - 板载 LED 在 GPIO2
+> - 板载 LED 在 D2 (GPIO2)
 
 ### GY-87 模块（正式选型）
 
@@ -82,21 +82,21 @@
 ```
 引脚: 1 × 8pin 单排, 2.54mm
 模块**背面**丝印（如上图，从左至右）: VCC_IN · 3.3V · GND · SCL · SDA · FSYNC · INTA · DRDY
-载板 J2 **正面直插**时 Pin1 在 DRDY 侧、Pin8 在 VCC_IN 侧（与背照顺序相反）
+载板 J2 排母（J2 Pin1 = VCC_IN, Pin8 = DRDY），与模块背照丝印顺序一致
 ```
 
 #### J2 排母引脚映射（载板 / 直插）
 
 | J2 Pin | GY-87 丝印 | 网络 | 连接 |
 | ------ | ---------- | ---- | ---- |
-| 1 | **DRDY** | — | NC |
-| 2 | **INTA** | MPU_INT | ESP32 GPIO2 |
-| 3 | **FSYNC** | — | NC |
-| 4 | **SDA** | I2C_SDA | ESP32 GPIO4 |
-| 5 | **SCL** | I2C_SCL | ESP32 GPIO5 |
-| 6 | **GND** | GND | ESP32 GND |
-| 7 | **3.3V** | — | **不接**（NC） |
-| 8 | **VCC_IN** | 3V3 | ESP32 Pin1 (3V3) |
+| 1 | **VCC_IN** | 3V3 | ESP32 Pin30 (3V3) |
+| 2 | **3.3V** | — | **不接**（NC） |
+| 3 | **GND** | GND | ESP32 GND |
+| 4 | **SCL** | I2C_SCL | ESP32 Pin23 (D5) |
+| 5 | **SDA** | I2C_SDA | ESP32 Pin26 (D4) |
+| 6 | **FSYNC** | — | NC |
+| 7 | **INTA** | MPU_INT | ESP32 Pin27 (D2) |
+| 8 | **DRDY** | — | NC |
 
 I2C 扫描：
 
@@ -106,7 +106,7 @@ I2C 扫描：
 0x1E  HMC5883L（可选，固件未用）
 ```
 
-> **PCB 版本**：原理图 **v0.5.1** 已按载板正面插入修正 J2 引脚顺序；**PCB v0.4** 走线仍待改后打样。
+> **PCB 版本**：原理图 **v0.6** 仅保留 MCU / IMU / OLED / 电源；**PCB v0.4** 走线仍待改后打样。
 
 #### 杜邦线联调（ESP32 扩展板）
 
@@ -136,6 +136,19 @@ I2C 扫描：
 有人/受压时 **倾斜 1° 以上**（`delta > 1.0°`）才判为 `OCCUPIED`。
 
 **最终产品**：模块应 **水平** 固定在坐垫下方，装好后串口发 `c` 重校准（基准角约 0°）。
+
+### OLED 显示屏
+
+1.54 寸 OLED（SSD1306, 128×64），I2C 接口，与 GY-87 共享 I2C 总线。
+
+| OLED Pin | 网络 | 接 ESP32 |
+|----------|------|----------|
+| VCC | 3V3 | Pin30 (3V3) |
+| GND | GND | Pin14/29 (GND) |
+| SCL | I2C_SCL | Pin23 (D5) |
+| SDA | I2C_SDA | Pin26 (D4) |
+
+I2C 地址：**0x3C**（与 GY-87 的 0x68 不冲突）。
 
 ### 供电模块 (PM11 电源板)
 
@@ -170,9 +183,9 @@ I2C 扫描：
 | 排针信号 | 说明 | 载板连接 |
 |----------|------|----------|
 | **VBAT** | 电池电压（未稳压） | 一般不接 ESP32 |
-| **5V** | 升压/稳压 5V 输出 | → ESP32 **Pin15 (VIN)**（可经载板开关） |
-| **3V3** | 3.3V 输出 | 备用；GY-87 从 ESP32 Pin1 取 3V3 |
-| GND | 共地 | → ESP32 **Pin14/19/28** + 载板 GND 铺铜 |
+| **5V** | 升压/稳压 5V 输出 | → ESP32 **Pin15 (VIN)** |
+| **3V3** | 3.3V 输出 | 备用；GY-87 从 ESP32 Pin30 取 3V3 |
+| GND | 共地 | → ESP32 **Pin14/29** + 载板 GND 铺铜 |
 
 > 上排 6Pin 功能以实物丝印为准；收到模块后**用万用表核对**再焊线。
 
@@ -184,7 +197,7 @@ USB ──→ [供电模块] ── ON/OFF ──→ 5V 排针 ──→ 载板 
               └── 电池 (4Pin +/-)             └── GND ──→ ESP32 GND
               └── 电量 LED (100/75/50/25%)
 
-ESP32 板载 LDO: VIN(5V) → 3V3 Pin1 → GY-87 VCC_IN
+ESP32 板载 LDO: VIN(5V) → 3V3 Pin30 → GY-87 VCC_IN
 ```
 
 #### 注意事项
@@ -192,22 +205,22 @@ ESP32 板载 LDO: VIN(5V) → 3V3 Pin1 → GY-87 VCC_IN
 1. 电池 **+/−** 切勿接反
 2. 开关 OFF 时 ESP32 完全断电；ON 后 5V 才输出到排针
 3. 充电时 USB 插入即可，与 ESP32 是否上电无关
-4. GPIO2 接 GY-87 **INTA**，与 ESP32 板载 LED 共用
+4. D2 (GPIO2) 接 GY-87 **INTA**，与 ESP32 板载 LED 共用
 
 ---
 
-## 载板网络表（ESP32 ↔ GY-87 J2）
+## 载板全网络表
 
-| 网络 | ESP32 排针 | 扩展板丝印 | J2 Pin | GY-87 丝印 |
-| ---- | ---------- | ---------- | ------ | ---------- |
-| — | — | — | 1 | DRDY (NC) |
-| MPU_INT | Pin 26 (GPIO2) | D2 | 2 | INTA |
-| — | — | — | 3 | FSYNC (NC) |
-| I2C_SDA | Pin 25 (GPIO4) | D4 | 4 | SDA |
-| I2C_SCL | Pin 22 (GPIO5) | D5 | 5 | SCL |
-| GND | Pin 14/19/28 | GND | 6 | GND |
-| — | — | — | 7 | 3.3V (NC) |
-| 3V3 | Pin 1 | 3V3 | 8 | VCC_IN |
+| 网络 | J1 (ESP32) | J2 (GY-87) | J3 (电源) | J4 (OLED) |
+|------|------------|------------|-----------|-----------|
+| 3V3 | Pin30 | Pin1(VCC_IN) | — | Pin1(VCC) |
+| 5V | Pin15(VIN) | — | Pin2 | — |
+| GND | Pin14,29 | Pin3 | Pin1 | Pin2 |
+| I2C_SCL | Pin23(D5) | Pin4(SCL) | — | Pin3 |
+| I2C_SDA | Pin26(D4) | Pin5(SDA) | — | Pin4 |
+| MPU_INT | Pin27(D2) | Pin7(INTA) | — | — |
+
+载板**无**载板级滑动开关与按键；电源通断由 **PM11 自带 ON/OFF** 控制。
 
 ---
 
@@ -215,19 +228,34 @@ ESP32 板载 LDO: VIN(5V) → 3V3 Pin1 → GY-87 VCC_IN
 
 ```
 供电模块 5V 排针 → 载板走线 → ESP32 Pin15 (VIN)
-供电模块 GND     → 载板 GND  → ESP32 Pin14/19/28
+供电模块 GND     → 载板 GND  → ESP32 Pin14/29
 ```
-
-（若载板仍保留 SS-12D00，则串联在 5V 排针与 VIN 之间。）
 
 ## 载板 BOM
 
-| # | 元件            | 规格                | 封装 | 数量 |
-| - | --------------- | ------------------- | ---- | :--: |
-| 1 | ESP32 排母 (左) | 1×15P 2.54mm       | 直插 |  1  |
-| 2 | ESP32 排母 (右) | 1×15P 2.54mm       | 直插 |  1  |
-| 3 | GY-87 排母 | 1×8P 2.54mm（GY-87 引脚顺序，见 J2 表） | 直插 |  1  |
-| 4 | PCB             | 100×80mm 2层 1.6mm | -    |  5  |
+| # | 元件 | 规格 | 封装 | 数量 |
+| - | ---- | ---- | ---- | :--: |
+| 1 | ESP32 排母 (左) | 1×15P 2.54mm | 直插 | 1 |
+| 2 | ESP32 排母 (右) | 1×15P 2.54mm | 直插 | 1 |
+| 3 | GY-87 排母 J2 | 1×8P 2.54mm | 直插 | 1 |
+| 4 | OLED 排母 J4 | 1×4P 2.54mm | 直插 | 1 |
+| 5 | JST 电源座 J3 | JST-PH 2.0mm 2P | 直插 | 1 |
+| 6 | PCB | 100×80mm 2层 1.6mm | - | 5 |
+
+## 固件交互（无载板按键）
+
+校准、切页等通过 **串口命令** 或自动逻辑完成（见 `firmware/FIRMWARE.md`）。
+
+**状态机：** `上电→CALIBRATING(3s)→MONITORING→VACANT/OCCUPIED→ALERT`
+
+**告警解除：** 起身 (Δ<1° 持续3s) 自动解除 → VACANT。
+
+**I2C 设备：**
+| 设备 | 地址 |
+|------|------|
+| MPU6050 (GY-87) | 0x68 |
+| BMP180 (GY-87, 忽略) | 0x77 |
+| SSD1306 OLED | 0x3C |
 
 ## PCB 规格
 
